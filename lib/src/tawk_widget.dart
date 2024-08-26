@@ -70,19 +70,20 @@ class _TawkState extends State<Tawk> {
 
   void init() async {
     if (Platform.isAndroid) {
-      await AndroidInAppWebViewController.setWebContentsDebuggingEnabled(true);
+      await InAppWebViewController.setWebContentsDebuggingEnabled(true);
 
-      var swAvailable = await AndroidWebViewFeature.isFeatureSupported(
-          AndroidWebViewFeature.SERVICE_WORKER_BASIC_USAGE);
-      var swInterceptAvailable = await AndroidWebViewFeature.isFeatureSupported(
-          AndroidWebViewFeature.SERVICE_WORKER_SHOULD_INTERCEPT_REQUEST);
+      var swAvailable = await WebViewFeature.isFeatureSupported(
+          WebViewFeature.SERVICE_WORKER_BASIC_USAGE);
+      var swInterceptAvailable = await WebViewFeature.isFeatureSupported(
+        WebViewFeature.SERVICE_WORKER_SHOULD_INTERCEPT_REQUEST,
+      );
 
       if (swAvailable && swInterceptAvailable) {
-        AndroidServiceWorkerController serviceWorkerController =
-            AndroidServiceWorkerController.instance();
+        ServiceWorkerController serviceWorkerController =
+            ServiceWorkerController.instance();
 
         await serviceWorkerController
-            .setServiceWorkerClient(AndroidServiceWorkerClient(
+            .setServiceWorkerClient(ServiceWorkerClient(
           shouldInterceptRequest: (request) async {
             return null;
           },
@@ -98,8 +99,9 @@ class _TawkState extends State<Tawk> {
         InAppWebView(
           gestureRecognizers: {}..add(Factory<VerticalDragGestureRecognizer>(
               () => VerticalDragGestureRecognizer())),
-          initialUrlRequest:
-              URLRequest(url: Uri.tryParse(widget.directChatLink)),
+          initialUrlRequest: URLRequest(
+            url: WebUri.uri(Uri.parse(widget.directChatLink)),
+          ),
           onWebViewCreated: (webViewController) {
             setState(() {
               _controller = webViewController;
